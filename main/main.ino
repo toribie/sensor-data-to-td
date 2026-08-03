@@ -22,11 +22,9 @@ void VextOFF()
     digitalWrite(Vext, HIGH);
 }
 
-void startup()
+void init_text()
 {
     VextON();
-    delay(100);
-
     display.init();
     display.clear();
 
@@ -37,14 +35,25 @@ void startup()
 
 void setup()
 {
-    startup();
+    init_text();
     pinMode(LED_BUILTIN, OUTPUT);
+    delay(2000);
 }
+
+void scrolling_text(int x_offset)
+{
+    display.clear();
+    display.drawString(0 + x_offset, 0, "Code is running...");
+    display.display();
+}
+
+int x_offset = -120;
 
 void loop()
 {
-  digitalWrite(LED_BUILTIN, HIGH);
-  delay(1000);
-  digitalWrite(LED_BUILTIN, LOW);
-  delay(1000);
-}
+  x_offset += 1;
+  if (x_offset > 200)
+    x_offset = -120;
+  scrolling_text(x_offset);
+  delay(20);
+    }
