@@ -10,6 +10,9 @@
 
 WifiManager wifi;
 
+/* Pins*/
+#define PRG_BUTTON 0
+
 // Display screen stuff, completely optional
 SSD1306Wire display(
     0x3c,
@@ -67,7 +70,7 @@ void setup()
     init_text();
     pinMode(LED_BUILTIN, OUTPUT);
     wifi.begin();
-    delay(2000);
+    delay(3000);
 }
 
 void loop()

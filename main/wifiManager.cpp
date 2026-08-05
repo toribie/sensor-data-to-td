@@ -5,11 +5,18 @@
 */
 
 #include "WifiManager.h"
+#define PRG_BUTTON 0
 
 void WifiManager::begin()
 {
+    pinMode(PRG_BUTTON, INPUT_PULLUP);
     prefs.begin("wifi", false);
 
+    if (digitalRead(PRG_BUTTON) == LOW) {
+        Serial.println("Entering configuration mode...");
+        startPortal();
+        return;
+    }
     connectStored();
 
     if (WiFi.status() != WL_CONNECTED)
@@ -79,11 +86,13 @@ void WifiManager::startPortal()
     configMode = true;
 
     WiFi.mode(WIFI_AP);
-    WiFi.softAP("ESP32-Setup");
+    WiFi.softAP("ESP32-Setup", "76543210");
     dns.start(53, "*", WiFi.softAPIP());
     setupRoutes();
     server.begin();
     Serial.println("Portal started.");
+    Serial.println("Connect to 'ESP32-Setup', password: 76543210");
+    Serial.println("Go to: http://192.168.4.1/");
 }
 
 void WifiManager::setupRoutes()
@@ -114,10 +123,18 @@ void WifiManager::setupRoutes()
         delay(1500);
         ESP.restart();
     });
+    server.on("/forget", HTTP_POST, [this]()
+    {
+    prefs.clear();
+    server.send(200, "text/plain", "Credentials erased. Rebooting...");
+    delay(1000);
+    ESP.restart();
+    });
 }
 
 void WifiManager::saveCredentials(String ssid, String password)
 {
     prefs.putString("ssid", ssid);
     prefs.putString("pass", password);
+    WiFi.disconnect(true);
 }
