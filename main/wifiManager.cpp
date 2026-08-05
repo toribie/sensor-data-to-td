@@ -18,20 +18,25 @@ void WifiManager::begin()
     }
 }
 
+static wl_status_t lastStatus = WL_IDLE_STATUS;
+
 void WifiManager::loop()
 {
+    wl_status_t current = WiFi.status();
+
+    if (current != lastStatus)
+    {
+        Serial.printf("WiFi status changed: %d\n", current);
+        lastStatus = current;
+    }
     if (configMode)
     {
         dns.processNextRequest();
         server.handleClient();
     }
-
-    if (!configMode)
+    if (!configMode && current != WL_CONNECTED)
     {
-        if (WiFi.status() != WL_CONNECTED)
-        {
-            WiFi.reconnect();
-        }
+        WiFi.reconnect();
     }
 }
 

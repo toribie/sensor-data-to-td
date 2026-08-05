@@ -44,16 +44,20 @@ void init_text()
 }
 
 int x_offset = -120;
+int current_delay = 0;
 
 void scrolling_text(int start_x, int y, int delay_time, int x_inc)
 {
     display.clear();
     display.drawString(0 + x_offset, y, "Code is running...");
     display.display();
-    x_offset += x_inc;
+    if (current_delay >= delay_time) {
+        x_offset += x_inc;
+        current_delay = 0;
+    }
     if (x_offset > 200)
         x_offset = start_x;
-    delay(delay_time);
+    current_delay++;
 }
 
 // ################
