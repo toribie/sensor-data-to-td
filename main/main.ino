@@ -5,63 +5,16 @@
 */
 
 #include <Wire.h>
-#include "HT_SSD1306Wire.h"
 #include "wifiManager.h"
+#include "text.h"
 
 WifiManager wifi;
 
 /* Pins*/
 #define PRG_BUTTON 0
 
-// Display screen stuff, completely optional
-SSD1306Wire display(
-    0x3c,
-    500000,
-    SDA_OLED,
-    SCL_OLED,
-    GEOMETRY_128_64,
-    RST_OLED
-);
-
-void VextON() // VextON and VextOFF turns ON/OFF the display.
-{
-    pinMode(Vext, OUTPUT);
-    digitalWrite(Vext, LOW);   // Turn OLED power on
-}
-
-void VextOFF()
-{
-    pinMode(Vext, OUTPUT);
-    digitalWrite(Vext, HIGH);
-}
-
-void init_text()
-{
-    VextON();
-    display.init();
-    display.clear();
-
-    display.setFont(ArialMT_Plain_16);
-    display.drawString(0, 20, "Hello World!");
-    display.display();
-}
-
-int x_offset = -120;
-int current_delay = 0;
-
-void scrolling_text(int start_x, int y, int delay_time, int x_inc)
-{
-    display.clear();
-    display.drawString(0 + x_offset, y, "Code is running...");
-    display.display();
-    if (current_delay >= delay_time) {
-        x_offset += x_inc;
-        current_delay = 0;
-    }
-    if (x_offset > 200)
-        x_offset = start_x;
-    current_delay++;
-}
+/* Other macros*/
+#define STARTUP_TIME 1500
 
 // ################
 void setup()
@@ -69,24 +22,32 @@ void setup()
     Serial.begin(9600);
     init_text();
     pinMode(LED_BUILTIN, OUTPUT);
+    display.drawString(0, 0, "Hello World!");
+    display.display();
     wifi.begin();
-    delay(3000);
+    delay(1500);
+    display.clear();
+    display.setFont(ArialMT_Plain_16);
 }
 
 void loop()
 {
+    display.clear();
     wifi.loop();
 
     if (wifi.isConnected())
     {
+        display.drawString(0, 0, "Connected");
         static unsigned long last = 0;
 
-        if (millis() - last > 5000)
+        if (millis() - last > 5000) // every 5 seconds print the IP
         {
             last = millis();
 
             Serial.println(wifi.getIP());
         }
+    } else {
+        display.drawString(0, 0, "Not connected");
     }
-    scrolling_text(-120, 0, 20, 1);
+    display.display();
 }

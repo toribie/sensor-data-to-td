@@ -5,22 +5,33 @@
 */
 
 #include "WifiManager.h"
+#include "text.h"
 #define PRG_BUTTON 0
 
 void WifiManager::begin()
 {
+    unsigned long start = millis();
     pinMode(PRG_BUTTON, INPUT_PULLUP);
     prefs.begin("wifi", false);
-
-    if (digitalRead(PRG_BUTTON) == LOW) {
-        Serial.println("Entering configuration mode...");
-        startPortal();
-        return;
+    
+    while (millis() - start < 3000) {
+        if (digitalRead(PRG_BUTTON) == LOW) {
+            Serial.println("Entering configuration mode...");
+            draw_small_text(0, 20, "Entering config mode.");
+            draw_small_text(0, 30, "Connect to 'ESP32-Setup'");
+            draw_small_text(0, 40, "Password: '76543210'");
+            draw_small_text(0, 50, "Go to 192.168.4.1");
+            delay(5000);
+            startPortal();
+            return;
+        }
     }
     connectStored();
 
     if (WiFi.status() != WL_CONNECTED)
     {
+        draw_small_text(0, 20, "Couldn't connect.");
+        draw_small_text(0, 30, "Entering config mode.");
         startPortal();
     }
 }
@@ -122,13 +133,6 @@ void WifiManager::setupRoutes()
         server.send(200,"text/html","Saved. Rebooting...");
         delay(1500);
         ESP.restart();
-    });
-    server.on("/forget", HTTP_POST, [this]()
-    {
-    prefs.clear();
-    server.send(200, "text/plain", "Credentials erased. Rebooting...");
-    delay(1000);
-    ESP.restart();
     });
 }
 
