@@ -10,29 +10,32 @@
 
 void WifiManager::begin()
 {
-    unsigned long start = millis();
     pinMode(PRG_BUTTON, INPUT_PULLUP);
     prefs.begin("wifi", false);
-    
-    while (millis() - start < 3000) {
-        if (digitalRead(PRG_BUTTON) == LOW) {
+
+    unsigned long start = millis();
+    while (millis() - start < 3000)
+    {
+        if (digitalRead(PRG_BUTTON) == LOW)
+        {
             Serial.println("Entering configuration mode...");
+
             draw_small_text(0, 20, "Entering config mode.");
             draw_small_text(0, 30, "Connect to 'ESP32-Setup'");
             draw_small_text(0, 40, "Password: '76543210'");
             draw_small_text(0, 50, "Go to 192.168.4.1");
+
             delay(5000);
+
             startPortal();
             return;
         }
     }
     connectStored();
-
     if (WiFi.status() != WL_CONNECTED)
     {
-        draw_small_text(0, 20, "Couldn't connect.");
-        draw_small_text(0, 30, "Entering config mode.");
-        startPortal();
+        draw_small_text(0, 30, "Couldn't connect.");
+        draw_small_text(0, 40, "Retrying...");
     }
 }
 
@@ -51,10 +54,19 @@ void WifiManager::loop()
     {
         dns.processNextRequest();
         server.handleClient();
+        return;
     }
-    if (!configMode && current != WL_CONNECTED)
+
+    static unsigned long lastReconnect = 0;
+    if (current != WL_CONNECTED)
     {
-        WiFi.reconnect();
+        if (millis() - lastReconnect >= 5000)
+        {
+            lastReconnect = millis();
+
+            Serial.println("Attempting reconnect...");
+            WiFi.reconnect();
+        }
     }
 }
 
@@ -78,16 +90,24 @@ void WifiManager::connectStored()
     String ssid = prefs.getString("ssid", "");
     String pass = prefs.getString("pass", "");
 
-    if (ssid == "")
+    if (ssid.isEmpty())
         return;
     WiFi.mode(WIFI_STA);
     WiFi.begin(ssid.c_str(), pass.c_str());
+
+    draw_small_text(0, 20, "Connecting...");
+
     unsigned long start = millis();
     while (WiFi.status() != WL_CONNECTED)
     {
         delay(250);
-        if (millis() - start > 15000)
+
+        if (millis() - start >= 15000)
+        {
+            Serial.println("Connection timed out.");
+            WiFi.disconnect(false, false);   // Cancel the current attempt
             return;
+        }
     }
     Serial.println("Connected.");
 }
