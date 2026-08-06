@@ -16,7 +16,7 @@ WifiManager wifi;
 /* Other macros*/
 #define STARTUP_TIME 1500
 
-// ################
+
 void setup()
 {
     Serial.begin(9600);
@@ -32,22 +32,29 @@ void setup()
 
 void loop()
 {
-    display.clear();
     wifi.loop();
 
-    if (wifi.isConnected())
+    static bool lastConnected = false;
+    bool connected = wifi.isConnected();
+
+    // Only redraw when the state changes, allows for slightly more performance.
+    if (connected != lastConnected)
     {
-        display.drawString(0, 0, "Connected");
-        static unsigned long last = 0;
+        display.clear();
 
-        if (millis() - last > 5000) // every 5 seconds print the IP
-        {
-            last = millis();
-
-            Serial.println(wifi.getIP());
-        }
-    } else {
-        display.drawString(0, 0, "Not connected");
+        if (connected)
+            display.drawString(0, 0, "Connected");
+        else
+            display.drawString(0, 0, "Not connected");
+        display.display();
+        lastConnected = connected;
     }
-    display.display();
+
+    // Every 5 seconds print the IP while connected
+    static unsigned long last = 0;
+    if (connected && millis() - last >= 5000)
+    {
+        last = millis();
+        Serial.println(wifi.getIP());
+    }
 }
