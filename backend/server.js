@@ -1,21 +1,39 @@
-const WebSocket = require('ws');
+const WebSocket = require("ws");
+const PORT = 8080;
+const wss = new WebSocket.Server({ port: PORT });
 
-const wss = new WebSocket.Server({ port: 8080 });
-console.log('WebSocket server is running on ws://localhost:8080');
+wss.on("connection", (ws, req) => {
+    console.log("Client connected:", req.socket.remoteAddress);
 
-// Connection event handler
-wss.on('connection', (ws) => {
-  console.log('New client connected');
-  
-  ws.send('Hello World!');
+    ws.on("message", (data) => {
+        console.log("Received:", data.toString());
 
-  ws.on('message', (message) => {
-    console.log(`Received: ${message}`);
-    // Echo the message back to the client
-    ws.send(`Server received: ${message}`);
-  });
+        try {
+            const json = JSON.parse(data.toString());
 
-  ws.on('close', () => {
-    console.log('Client disconnected');
-  });
-}); 
+            console.log("Parsed JSON:", json);
+
+            ws.send(JSON.stringify({
+                type: "response",
+                message: "Hello from Node.js!"
+            }));
+        } catch (err) {
+            console.error("Invalid JSON:", err.message);
+
+            ws.send(JSON.stringify({
+                type: "error",
+                message: "Invalid JSON"
+            }));
+        }
+    });
+
+    ws.on("close", () => {
+        console.log("Client disconnected");
+    });
+
+    ws.on("error", (err) => {
+        console.error("Error:", err);
+    });
+});
+
+console.log(`WebSocket server listening on port ${PORT}`);

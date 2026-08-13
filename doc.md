@@ -17,6 +17,10 @@ Docs:
 [https://docs.heltec.org/en/node/esp32/wifi\_kit\_32/](https://docs.heltec.org/en/node/esp32/wifi_kit_32/)
 
 
+For testing server:
+wscat -c ws://localhost:8080 
 
+run the server: node server.js
 
-
+example message: 
+{"ax":11.3,"volume":32.7}
