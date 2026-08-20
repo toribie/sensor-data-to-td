@@ -20,7 +20,7 @@ WebSocketsClient webSocket;
 /* Other macros */
 #define STARTUP_TIME 1500
 
-const char* webSocketServer = "192.168.0.63";
+String webSocketServer; // ex "192.168.0.63";
 const uint16_t webSocketPort = 8080;
 const char* webSocketPath = "/";
 
@@ -71,10 +71,18 @@ void setup()
     display.drawString(0, 0, "Hello World!");
     display.display();
     wifi.begin();
+
+    webSocketServer = wifi.getServerIP();
+    if (webSocketServer.isEmpty()) {
+        webSocketServer = "192.168.0.63";  // fallback ip
+    }
+    Serial.print("WebSocket server: ");
+    Serial.println(webSocketServer);
+
     delay(1500);
     display.clear();
     display.setFont(ArialMT_Plain_16);
-    webSocket.begin(webSocketServer, webSocketPort, webSocketPath);
+    webSocket.begin(webSocketServer.c_str(), webSocketPort, webSocketPath);
     webSocket.onEvent(webSocketEvent);
     webSocket.setReconnectInterval(5000);
 }
@@ -97,26 +105,21 @@ void loop()
         display.display();
         lastConnected = connected;
     }
-
-    // WebSocket processing
     if (connected)
     {
         webSocket.loop();
     }
-
-    // Send a test JSON message every 5 minutes
-    if (connected && millis() - lastTest >= 300000)
+    // Send a test JSON message every 3 minutes
+    if (connected && millis() - lastTest >= 120000)
     {
         lastTest = millis();
 
         JsonDocument doc;
-
         doc["type"] = "test";
         doc["message"] = "Hello from ESP32";
         doc["millis"] = millis();
 
         String json;
-
         serializeJson(doc, json);
         webSocket.sendTXT(json);
         Serial.print("Sent: ");

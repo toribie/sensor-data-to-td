@@ -85,6 +85,11 @@ String WifiManager::getSSID()
     return WiFi.SSID();
 }
 
+String WifiManager::getServerIP()
+{
+    return prefs.getString("server_ip", "");
+}
+
 void WifiManager::connectStored()
 {
     String ssid = prefs.getString("ssid", "");
@@ -138,7 +143,9 @@ void WifiManager::setupRoutes()
         html += "SSID:<br>";
         html += "<input name='ssid'><br>";
         html += "Password:<br>";
-        html += "<input name='pass' type='password'><br><br>";
+        html += "<input name='pass' type='password'><br>";
+        html += "Server IP:<br>";
+        html += "<input name='ip'><br><br>";
         html += "<input type='submit'>";
         html += "</form></body></html>";
         server.send(200,"text/html",html);
@@ -148,17 +155,19 @@ void WifiManager::setupRoutes()
     {
         String ssid = server.arg("ssid");
         String pass = server.arg("pass");
+        String server_ip = server.arg("ip");
 
-        saveCredentials(ssid, pass);
+        saveCredentials(ssid, pass, server_ip);
         server.send(200,"text/html","Saved. Rebooting...");
         delay(1500);
         ESP.restart();
     });
 }
 
-void WifiManager::saveCredentials(String ssid, String password)
+void WifiManager::saveCredentials(String ssid, String password, String server_ip)
 {
     prefs.putString("ssid", ssid);
     prefs.putString("pass", password);
+    prefs.putString("server_ip", server_ip);
     WiFi.disconnect(true);
 }

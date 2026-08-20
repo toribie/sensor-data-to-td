@@ -21,6 +21,7 @@ public:
     bool isConnected();
     String getIP();
     String getSSID();
+    String getServerIP();
 
 private:
     Preferences prefs;
@@ -31,7 +32,7 @@ private:
     void connectStored();
     void startPortal();
     void setupRoutes();
-    void saveCredentials(String ssid, String password);
+    void saveCredentials(String ssid, String password, String server_ip);
 };
 
 #endif
