@@ -5,13 +5,13 @@
 */
 
 #include "WifiManager.h"
-#include "text.h"
 #define PRG_BUTTON 0
 
 void WifiManager::begin()
 {
     pinMode(PRG_BUTTON, INPUT_PULLUP);
     prefs.begin("wifi", false);
+    Serial.println("Hello World!");
 
     unsigned long start = millis();
     while (millis() - start < 3000)
@@ -19,14 +19,12 @@ void WifiManager::begin()
         if (digitalRead(PRG_BUTTON) == LOW)
         {
             Serial.println("Entering configuration mode...");
-
-            draw_small_text(0, 20, "Entering config mode.");
-            draw_small_text(0, 30, "Connect to 'ESP32-Setup'");
-            draw_small_text(0, 40, "Password: '76543210'");
-            draw_small_text(0, 50, "Go to 192.168.4.1");
+            //draw_small_text(0, 20, "Entering config mode.");
+            //draw_small_text(0, 30, "Connect to 'ESP32-Setup'");
+            //draw_small_text(0, 40, "Password: '76543210'");
+            //draw_small_text(0, 50, "Go to 192.168.4.1");
 
             delay(5000);
-
             startPortal();
             return;
         }
@@ -34,8 +32,8 @@ void WifiManager::begin()
     connectStored();
     if (WiFi.status() != WL_CONNECTED)
     {
-        draw_small_text(0, 30, "Couldn't connect.");
-        draw_small_text(0, 40, "Retrying...");
+        //draw_small_text(0, 30, "Couldn't connect.");
+        //draw_small_text(0, 40, "Retrying...");
     }
 }
 
@@ -100,7 +98,7 @@ void WifiManager::connectStored()
     WiFi.mode(WIFI_STA);
     WiFi.begin(ssid.c_str(), pass.c_str());
 
-    draw_small_text(0, 20, "Connecting...");
+    //draw_small_text(0, 20, "Connecting...");
 
     unsigned long start = millis();
     while (WiFi.status() != WL_CONNECTED)
@@ -136,19 +134,25 @@ void WifiManager::setupRoutes()
     server.on("/", HTTP_GET, [this]()
     {
         String html;
+        String savedSSID = prefs.getString("ssid", "");
+        String savedServerIP = prefs.getString("server_ip", "");
 
         html += "<html><body>";
         html += "<h2>WiFi Setup</h2>";
         html += "<form action='/save' method='POST'>";
+
         html += "SSID:<br>";
-        html += "<input name='ssid'><br>";
+        html += "<input name='ssid' value='" + savedSSID + "'><br>";
+
         html += "Password:<br>";
         html += "<input name='pass' type='password'><br>";
+
         html += "Server IP:<br>";
-        html += "<input name='ip'><br><br>";
+        html += "<input name='ip' value='" + savedServerIP + "'><br><br>";
+
         html += "<input type='submit'>";
         html += "</form></body></html>";
-        server.send(200,"text/html",html);
+        server.send(200, "text/html", html);
     });
 
     server.on("/save", HTTP_POST, [this]()
@@ -158,7 +162,7 @@ void WifiManager::setupRoutes()
         String server_ip = server.arg("ip");
 
         saveCredentials(ssid, pass, server_ip);
-        server.send(200,"text/html","Saved. Rebooting...");
+        server.send(200, "text/html", "Saved. Rebooting...");
         delay(1500);
         ESP.restart();
     });

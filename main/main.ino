@@ -2,12 +2,11 @@
 ** main.ino
 ** 03 août 2026
 ** TRAN Olivier
-** Sketch is hitting 88% of program storage space (1160795/1219720)
+** Sketch is hitting 83% of program storage space (1060795/1219720)
 */
 
 #include <Wire.h>
 #include "wifiManager.h"
-#include "text.h"
 #include <WebSocketsClient.h>
 #include <ArduinoJson.h>
 
@@ -66,22 +65,24 @@ void webSocketEvent(WStype_t type, uint8_t * payload, size_t length)
 void setup()
 {
     Serial.begin(9600);
-    init_text();
+    //init_text();
     pinMode(LED_BUILTIN, OUTPUT);
-    display.drawString(0, 0, "Hello World!");
-    display.display();
+    //display.drawString(0, 0, "Hello World!");
+    //display.display();
     wifi.begin();
+    Serial.print("Self IP: ");
+    Serial.println(wifi.getIP());
 
     webSocketServer = wifi.getServerIP();
     if (webSocketServer.isEmpty()) {
         webSocketServer = "192.168.0.63";  // fallback ip
     }
-    Serial.print("WebSocket server: ");
+    Serial.print("Current WebSocket IP: ");
     Serial.println(webSocketServer);
 
     delay(1500);
-    display.clear();
-    display.setFont(ArialMT_Plain_16);
+    //display.clear();
+    //display.setFont(ArialMT_Plain_16);
     webSocket.begin(webSocketServer.c_str(), webSocketPort, webSocketPath);
     webSocket.onEvent(webSocketEvent);
     webSocket.setReconnectInterval(5000);
@@ -96,21 +97,22 @@ void loop()
 
     if (connected != lastConnected)
     {
-        display.clear();
-
+        //display.clear();
+        /*
         if (connected)
-            display.drawString(0, 0, "Connected");
+            //display.drawString(0, 0, "Connected");
         else
-            display.drawString(0, 0, "Not connected");
-        display.display();
+            //display.drawString(0, 0, "Not connected");
+        //display.display();
+        */
         lastConnected = connected;
     }
     if (connected)
     {
         webSocket.loop();
     }
-    // Send a test JSON message every 3 minutes
-    if (connected && millis() - lastTest >= 120000)
+    // Send a test JSON message every minute ()
+    if (connected && millis() - lastTest >= 60000)
     {
         lastTest = millis();
 
