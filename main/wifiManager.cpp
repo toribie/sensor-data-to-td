@@ -5,13 +5,13 @@
 */
 
 #include "WifiManager.h"
+#include "display.h"
 #define PRG_BUTTON 0
 
 void WifiManager::begin()
 {
     pinMode(PRG_BUTTON, INPUT_PULLUP);
     prefs.begin("wifi", false);
-    Serial.println("Hello World!");
 
     unsigned long start = millis();
     while (millis() - start < 3000)
@@ -19,10 +19,14 @@ void WifiManager::begin()
         if (digitalRead(PRG_BUTTON) == LOW)
         {
             Serial.println("Entering configuration mode...");
-            //draw_small_text(0, 20, "Entering config mode.");
-            //draw_small_text(0, 30, "Connect to 'ESP32-Setup'");
-            //draw_small_text(0, 40, "Password: '76543210'");
-            //draw_small_text(0, 50, "Go to 192.168.4.1");
+
+            display.clearDisplay();
+            display.println("Entering config mode.");
+            display.println("");
+            display.println("Connect to 'ESP32-Setup'");
+            display.println("Password: '76543210'");
+            display.println("Go to 192.168.4.1");
+            display.display();
 
             delay(5000);
             startPortal();
@@ -32,8 +36,9 @@ void WifiManager::begin()
     connectStored();
     if (WiFi.status() != WL_CONNECTED)
     {
-        //draw_small_text(0, 30, "Couldn't connect.");
-        //draw_small_text(0, 40, "Retrying...");
+        display.println("Couldn't connect.");
+        display.println("Retrying...");
+        display.display();
     }
 }
 
@@ -98,7 +103,8 @@ void WifiManager::connectStored()
     WiFi.mode(WIFI_STA);
     WiFi.begin(ssid.c_str(), pass.c_str());
 
-    //draw_small_text(0, 20, "Connecting...");
+    display.println("Connecting...");
+    display.display();
 
     unsigned long start = millis();
     while (WiFi.status() != WL_CONNECTED)
@@ -125,7 +131,12 @@ void WifiManager::startPortal()
     setupRoutes();
     server.begin();
     Serial.println("Portal started.");
-    Serial.println("Connect to 'ESP32-Setup', password: 76543210");
+    display.setCursor(0, 0);
+    Serial.println("Entering config mode.");
+    Serial.println("");
+    Serial.println("Connect to:");
+    Serial.println("'ESP32-Setup'");
+    Serial.println("password: 76543210");
     Serial.println("Go to: http://192.168.4.1/");
 }
 

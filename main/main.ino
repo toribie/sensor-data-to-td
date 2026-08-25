@@ -1,14 +1,15 @@
 /*
 ** main.ino
-** 03 août 2026
+** 01 août 2026
 ** TRAN Olivier
-** Sketch is hitting 83% of program storage space (1060795/1219720)
+** Sketch: 1138023 / 1310720 bytes (86%) of program storage space.
+** Global vars: 48996 / 327680 bytes (14%) of dynamic memory.
 */
 
-#include <Wire.h>
 #include "wifiManager.h"
 #include <WebSocketsClient.h>
 #include <ArduinoJson.h>
+#include "display.h"
 
 WifiManager wifi;
 WebSocketsClient webSocket;
@@ -23,7 +24,8 @@ String webSocketServer; // ex "192.168.0.63";
 const uint16_t webSocketPort = 8080;
 const char* webSocketPath = "/";
 
-unsigned long lastTest = 0;
+unsigned long lastTest = 0; // used to send a message to the server every minute
+bool webSocketConnected = false;
 
 void webSocketEvent(WStype_t type, uint8_t * payload, size_t length)
 {
@@ -31,12 +33,12 @@ void webSocketEvent(WStype_t type, uint8_t * payload, size_t length)
     {
         case WStype_DISCONNECTED:
             Serial.println("WebSocket disconnected");
+            webSocketConnected = false;
             break;
 
         case WStype_CONNECTED:
             Serial.println("WebSocket connected");
-
-            // Send an initial test message
+            webSocketConnected = true;
             {
                 JsonDocument doc;
                 doc["type"] = "test";
@@ -65,24 +67,32 @@ void webSocketEvent(WStype_t type, uint8_t * payload, size_t length)
 void setup()
 {
     Serial.begin(9600);
-    //init_text();
+    Serial.println("Hello World!");
+    initDisplay();
     pinMode(LED_BUILTIN, OUTPUT);
-    //display.drawString(0, 0, "Hello World!");
-    //display.display();
+
+    display.setTextSize(2);
+    display.setTextColor(SSD1306_WHITE);
+    display.setCursor(0, 0);
+    display.println("hello! c:");
+    display.display();
+    display.setTextSize(1);
+
     wifi.begin();
     Serial.print("Self IP: ");
     Serial.println(wifi.getIP());
 
     webSocketServer = wifi.getServerIP();
     if (webSocketServer.isEmpty()) {
-        webSocketServer = "192.168.0.63";  // fallback ip
+        webSocketServer = "192.168.0.99";  // fallback ip
     }
     Serial.print("Current WebSocket IP: ");
     Serial.println(webSocketServer);
 
     delay(1500);
-    //display.clear();
-    //display.setFont(ArialMT_Plain_16);
+    display.clearDisplay();
+    display.setCursor(0, 0);
+
     webSocket.begin(webSocketServer.c_str(), webSocketPort, webSocketPath);
     webSocket.onEvent(webSocketEvent);
     webSocket.setReconnectInterval(5000);
@@ -97,20 +107,29 @@ void loop()
 
     if (connected != lastConnected)
     {
-        //display.clear();
-        /*
+        display.clearDisplay();
+
+        // Wifi status
         if (connected)
-            //display.drawString(0, 0, "Connected");
+            display.println("Wi-Fi: Connected");
         else
-            //display.drawString(0, 0, "Not connected");
-        //display.display();
-        */
+            display.println("Wi-Fi: Not connected");
+
+        // Websocket status
+        if (webSocketConnected)
+            display.println("WS: Connected");
+        else
+            display.println("WS: Not connected");
+
+        display.display();
         lastConnected = connected;
     }
+
     if (connected)
     {
         webSocket.loop();
     }
+
     // Send a test JSON message every minute ()
     if (connected && millis() - lastTest >= 60000)
     {
@@ -118,7 +137,7 @@ void loop()
 
         JsonDocument doc;
         doc["type"] = "test";
-        doc["message"] = "Hello from ESP32";
+        doc["message"] = "Ping!";
         doc["millis"] = millis();
 
         String json;
