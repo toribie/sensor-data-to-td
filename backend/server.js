@@ -7,16 +7,16 @@ wss.on("connection", (ws, req) => {
     console.log("Client connected:", req.socket.remoteAddress);
 
     ws.on("message", (data) => {
-        console.log("Received:", data.toString());
+        //console.log("Received:", data.toString());
 
         try {
             const json = JSON.parse(data.toString());
 
-            console.log("Parsed JSON:", json);
+            console.log("Received:", json);
 
             ws.send(JSON.stringify({
                 type: "response",
-                message: "Hello from Node.js!"
+                message: "Pong!"
             }));
         } catch (err) {
             console.error("Invalid JSON:", err.message);
