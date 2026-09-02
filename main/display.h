@@ -1,3 +1,9 @@
+/*
+** display.h
+** 26 août 2026
+** TRAN Olivier
+*/
+
 #ifndef DISPLAY_H
 #define DISPLAY_H
 
