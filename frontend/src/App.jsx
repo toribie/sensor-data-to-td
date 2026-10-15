@@ -27,7 +27,7 @@ function App() {
   const [sensorData, setSensorData] = useState({});
 
   useEffect(() => {
-    const ws = new WebSocket("ws://192.168.0.80:8080");      // Put server IP here.
+    const ws = new WebSocket("ws://192.168.30.37:8080");      // Put server IP here.
 
     ws.onopen = () => {
       console.log("WebSocket connected");
@@ -62,7 +62,7 @@ function App() {
 
         setSensorData(sensors);
       } catch (error) {
-        console.error("Could not parse WebSocket message:", error);
+        console.error("Could not parse message:", error);
       }
     };
 

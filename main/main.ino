@@ -10,50 +10,54 @@
 #include <WebSocketsClient.h>
 #include <ArduinoJson.h>
 #include "display.h"
+#include "gyro.h"
 
 WifiManager wifi;
 WebSocketsClient webSocket;
 
 /* Pins */
 #define PRG_BUTTON 0
-#define PIN_BUTTON 10
-#define X_JOYSTICK 11
-#define Y_JOYSTICK 12
 
 /* Other macros */
 #define STARTUP_TIME 1500
+#define SEND_DELAY 50  //in millisecs
 
 String webSocketServer; // ex "192.168.0.63";
 const uint16_t webSocketPort = 8080;
 const char* webSocketPath = "/";
 
 bool webSocketConnected = false;
-bool lastButtonState = false;
+unsigned long lastSensorSend = 0;
 
 void sendSensorData()
 {
     if (!webSocketConnected)
         return;
+
     JsonDocument doc;
+    GyroData gyroData;
+
+    if (!Gyro::read(gyroData))
+    {
+        Serial.println("Failed to read gyro");
+        return;
+    }
 
     doc["type"] = "sensor_data";
 
-    // Button
-    doc["button"]["pressed"] = (digitalRead(PIN_BUTTON) == LOW);
+    doc["accel"]["x"] = gyroData.accelX;
+    doc["accel"]["y"] = gyroData.accelY;
+    doc["accel"]["z"] = gyroData.accelZ;
 
-    /*
-     * doc["temperature"] = temperature;
-     * doc["gyro"]["x_axis"] = x_axis;
-     */
+    doc["rotation"]["x"] = gyroData.gyroX;
+    doc["rotation"]["y"] = gyroData.gyroY;
+    doc["rotation"]["z"] = gyroData.gyroZ;
 
     String json;
     serializeJson(doc, json);
-
-    //Serial.printf("%lu", millis());
     webSocket.sendTXT(json);
-
-    Serial.print("Sent: ");
-    Serial.println(json);
+    //Serial.print("Sent: ");
+    //Serial.println(json);
 }
 
 
@@ -86,12 +90,13 @@ void setup()
 {
     Serial.begin(9600);
     Serial.println("Hello World!");
+    pinMode(LED_BUILTIN, OUTPUT);
 
     initDisplay();
-
-    pinMode(LED_BUILTIN, OUTPUT);
-    pinMode(PIN_BUTTON, INPUT_PULLUP);
-
+    if (!Gyro::begin())
+    {
+        Serial.println("Gyro init failed.");
+    }
     display.setTextSize(2);
     display.setTextColor(SSD1306_WHITE);
     display.setCursor(0, 0);
@@ -105,7 +110,6 @@ void setup()
     Serial.println(wifi.getIP());
 
     webSocketServer = wifi.getServerIP();
-
     if (webSocketServer.isEmpty())
     {
         webSocketServer = "192.168.0.99";  // fallback ip
@@ -134,23 +138,14 @@ void loop()
     static bool lastConnected = false;
     bool connected = wifi.isConnected();
 
-    if (connected != lastConnected)
+    if (connected != lastConnected) // Screen gets refreshed when wifi status changes
     {
         display.clearDisplay();
 
-        // Wi-Fi status
         if (connected)
             display.println("Wi-Fi: Connected");
         else
             display.println("Wi-Fi: Not connected");
-
-        // WebSocket status (broken for the moment)
-        /*
-        if (webSocketConnected)
-            display.println("Server: Connected");
-        else
-            display.println("Server: Not connected");
-        */
 
         display.display();
         lastConnected = connected;
@@ -160,7 +155,9 @@ void loop()
     {
         webSocket.loop();
     }
-
-    bool buttonPressed = (digitalRead(PIN_BUTTON) == LOW);
+    if (webSocketConnected && millis() - lastSensorSend >= SEND_DELAY)
+    {
+        lastSensorSend = millis();
         sendSensorData();
+    }
 }
