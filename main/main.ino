@@ -16,11 +16,11 @@ WifiManager wifi;
 WebSocketsClient webSocket;
 
 /* Pins */
-#define PRG_BUTTON 0
+#define PRG_BUTTON 0    //used to enter setup mode at the beginning.
 
 /* Other macros */
 #define STARTUP_TIME 1500
-#define SEND_DELAY 50  //in millisecs
+#define SEND_DELAY 50  //time between sending packets, in millisecs
 
 String webSocketServer; // ex "192.168.0.63";
 const uint16_t webSocketPort = 8080;
@@ -45,13 +45,12 @@ void sendSensorData()
 
     doc["type"] = "sensor_data";
 
-    doc["accel"]["x"] = gyroData.accelX;
-    doc["accel"]["y"] = gyroData.accelY;
-    doc["accel"]["z"] = gyroData.accelZ;
-
-    doc["rotation"]["x"] = gyroData.gyroX;
-    doc["rotation"]["y"] = gyroData.gyroY;
-    doc["rotation"]["z"] = gyroData.gyroZ;
+    doc["gyro"]["accel"]["x"] = gyroData.accelX;
+    doc["gyro"]["accel"]["y"] = gyroData.accelY;
+    doc["gyro"]["accel"]["z"] = gyroData.accelZ;
+    doc["gyro"]["rotation"]["x"] = gyroData.gyroX;
+    doc["gyro"]["rotation"]["y"] = gyroData.gyroY;
+    doc["gyro"]["rotation"]["z"] = gyroData.gyroZ;
 
     String json;
     serializeJson(doc, json);
@@ -98,7 +97,6 @@ void setup()
         Serial.println("Gyro init failed.");
     }
     display.setTextSize(2);
-    display.setTextColor(SSD1306_WHITE);
     display.setCursor(0, 0);
     display.println("hello! :)");
     display.display();

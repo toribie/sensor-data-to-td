@@ -4,6 +4,16 @@
 ** TRAN Olivier
 */
 
+/* WiFi status: statuses 0, 1, 2 are not relevant
+** 0 - WL_IDLE_STATUS: default status when init
+** 1 - WL_NO_SSID_AVAIL
+** 2 - WL_SCAN_COMPLETED
+** 3 - WL_CONNECTED
+** 4 - WL_CONNECT_FAILED
+** 5 - WL_CONNECTION_LOST
+** 6 - WL_DISCONNECTED
+*/
+
 #include "WifiManager.h"
 #include "display.h"
 #define PRG_BUTTON 0

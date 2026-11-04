@@ -25,6 +25,7 @@ namespace Gyro
     {
         if (!gyroWire.begin(SDA_GYRO_PIN, SCL_GYRO_PIN, 100000)) {
             Serial.println("Gyro I2C init failed");
+            Serial.println("Check SDA and SCL pins for the MPU6050.");
             return false;
         }
 
@@ -38,7 +39,6 @@ namespace Gyro
         mpu.setAccelerometerRange(MPU6050_RANGE_4_G);
         mpu.setGyroRange(MPU6050_RANGE_500_DEG);
         mpu.setFilterBandwidth(MPU6050_BAND_44_HZ);
-
         Serial.println("Gyro initialized");
         return true;
     }
