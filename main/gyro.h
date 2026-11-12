@@ -11,15 +11,11 @@
 
 struct GyroData
 {
-    float accelX;
-    float accelY;
-    float accelZ;
+    float roll;
+    float pitch;
+    float yaw;
 
-    float gyroX;
-    float gyroY;
-    float gyroZ;
-
-    float temperature; //Temperature of the chip itself
+    float temperature;
 };
 
 namespace Gyro

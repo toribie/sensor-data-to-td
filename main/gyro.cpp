@@ -53,15 +53,33 @@ namespace Gyro
             return false;
         }
 
-        data.accelX = accel.acceleration.x;
-        data.accelY = accel.acceleration.y;
-        data.accelZ = accel.acceleration.z;
+        // Roll and Pitch (degrees)
+        data.roll = atan2(accel.acceleration.y,
+                        accel.acceleration.z) * 180.0 / PI;
 
-        data.gyroX = gyro.gyro.x;
-        data.gyroY = gyro.gyro.y;
-        data.gyroZ = gyro.gyro.z;
+        data.pitch = atan2(-accel.acceleration.x,
+                        sqrt(accel.acceleration.y * accel.acceleration.y +
+                                accel.acceleration.z * accel.acceleration.z))
+                    * 180.0 / PI;
 
-        data.temperature = temp.temperature; // chip temperature
+        // Yaw (degrees)
+        static float yaw = 0.0;
+        static unsigned long lastTime = 0;
+
+        unsigned long currentTime = micros();
+
+        if (lastTime != 0) {
+            float dt = (currentTime - lastTime) / 1000000.0;
+
+            yaw += gyro.gyro.z * dt * 180.0 / PI;
+        }
+
+        lastTime = currentTime;
+
+        data.yaw = yaw;
+
+        data.temperature = temp.temperature;
+
         return true;
     }
 }

@@ -44,13 +44,9 @@ void sendSensorData()
     }
 
     doc["type"] = "sensor_data";
-
-    doc["gyro"]["accel"]["x"] = gyroData.accelX;
-    doc["gyro"]["accel"]["y"] = gyroData.accelY;
-    doc["gyro"]["accel"]["z"] = gyroData.accelZ;
-    doc["gyro"]["rotation"]["x"] = gyroData.gyroX;
-    doc["gyro"]["rotation"]["y"] = gyroData.gyroY;
-    doc["gyro"]["rotation"]["z"] = gyroData.gyroZ;
+    doc["gyro"]["roll"] = gyroData.roll;
+    doc["gyro"]["pitch"] = gyroData.pitch;
+    doc["gyro"]["yaw"] = gyroData.yaw;
 
     String json;
     serializeJson(doc, json);
