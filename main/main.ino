@@ -19,7 +19,7 @@ WebSocketsClient webSocket;
 #define PRG_BUTTON 0    //used to enter setup mode at the beginning.
 
 /* Other macros */
-#define STARTUP_TIME 1500
+#define STARTUP_TIME 1000
 #define SEND_DELAY 50  //time between sending packets, in millisecs
 
 String webSocketServer; // ex "192.168.0.63";
@@ -88,21 +88,26 @@ void setup()
     pinMode(LED_BUILTIN, OUTPUT);
 
     initDisplay();
+    display.setTextSize(2);
+    display.setCursor(0, 0);
+    display.println("hello! :)");
+    display.setTextSize(1);
+    display.display();
+    //Wi-Fi setup
+    wifi.begin();
+    Serial.print("Self IP: ");
+    Serial.println(wifi.getIP());
+    delay(STARTUP_TIME);
+
+    //Gyro setup
+    display.println("Calibrating gyro...");
+    display.display();
     if (!Gyro::begin())
     {
         Serial.println("Gyro init failed.");
     }
-    display.setTextSize(2);
-    display.setCursor(0, 0);
-    display.println("hello! :)");
-    display.display();
-    display.setTextSize(1);
 
-    wifi.begin();
-
-    Serial.print("Self IP: ");
-    Serial.println(wifi.getIP());
-
+    //WS setup
     webSocketServer = wifi.getServerIP();
     if (webSocketServer.isEmpty())
     {
@@ -110,9 +115,6 @@ void setup()
     }
     Serial.print("Current Server IP: ");
     Serial.println(webSocketServer);
-
-    delay(STARTUP_TIME);
-
     display.clearDisplay();
     display.setCursor(0, 0);
 
