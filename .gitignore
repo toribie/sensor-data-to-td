@@ -1,3 +1,5 @@
 .vscode
 analyze.py
 test_*
+touch-designer/Backup/
+doc.md
