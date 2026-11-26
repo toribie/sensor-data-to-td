@@ -16,14 +16,6 @@ namespace
     float gyroZOffset = 0.0f;
 }
 
-float angle_normalise(float angle) //without it the angle values will go to 179 to -180 and vice-versa.
-{
-    while (angle > 180.0f)
-        angle -= 360.0f;
-    while (angle < -180.0f)
-        angle += 360.0f;
-}
-
 namespace Gyro
 {
     bool begin()
