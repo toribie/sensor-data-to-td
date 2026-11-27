@@ -105,12 +105,15 @@ Below is the general workflow inside `main.toe`, `sensor_controller` shouldn't n
 new features.
 
 1. `ws_input`
+
 This is where TD receives the data.
 
 2. `sensor_controller`
+
 Its role is to convert the data in JSON format to one akin to a python dictionary.
 Note that if a data is written like so in the code: `doc[key][value]` it will be written `key_value`.
 
 3. `gyro_values` + `sensor_values` + `...`
+
 The sensor data is converted into channels to be used within TD.
 To add new channels refer to the documentation inside `sensor_values1_callbacks`.
