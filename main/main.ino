@@ -42,17 +42,21 @@ void sendSensorData()
         Serial.println("Failed to read gyro");
         return;
     }
+    //Put your variables where the sensor data is collected here.
 
     doc["type"] = "sensor_data";
     doc["gyro"]["roll"] = gyroData.roll;
     doc["gyro"]["pitch"] = gyroData.pitch;
     doc["gyro"]["yaw"] = gyroData.yaw;
 
+    // doc["example"] = data;
+    //         or
+    // doc["example"]["value1"] = data1;
+    // doc["example"]["value2"] = data2;
+
     String json;
     serializeJson(doc, json);
     webSocket.sendTXT(json);
-    //Serial.print("Sent: ");
-    //Serial.println(json);
 }
 
 

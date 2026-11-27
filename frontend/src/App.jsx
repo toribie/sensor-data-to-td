@@ -27,7 +27,7 @@ function App() {
   const [sensorData, setSensorData] = useState({});
 
   useEffect(() => {
-    const ws = new WebSocket("ws://192.168.30.37:8080");      // Put server IP here.
+    const ws = new WebSocket("ws://192.168.30.29:8080");      // Put server IP here.
 
     ws.onopen = () => {
       console.log("WebSocket connected");
