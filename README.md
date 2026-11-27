@@ -111,7 +111,7 @@ This is where TD receives the data.
 2. `sensor_controller`
 
 Its role is to convert the data in JSON format to one akin to a python dictionary.
-Note that if a data is written like so in the code: `doc[key][value]` it will be written `key_value`.
+Note that if a data is written like so in the code: `doc[key][value]` will be written as `key_value`.
 
 3. `gyro_values` + `sensor_values` + `...`
 
